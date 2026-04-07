@@ -168,10 +168,8 @@ module UART_TX #(
         end
     end
 endmodule
-
-// ================================================
 // UART_TO_RAM_CTRL (MODULE BỊ THIẾU - ĐÃ THÊM)
-// ================================================
+
 module UART_TO_RAM_CTRL (
     input clk,
     input rst,
@@ -208,9 +206,7 @@ module UART_TO_RAM_CTRL (
     end
 endmodule
 
-// ================================================
 // ALU VÀ CÁC MODULE HỖ TRỢ (KHÔNG THAY ĐỔI LOGIC)
-// ================================================
 module full_adder (
     input a, input b, input cin,
     output sum, output cout
@@ -307,9 +303,8 @@ module REG8 (
     end
 endmodule
 
-// ================================================
 // CPU MODULES
-// ================================================
+
 module CPU_FSM (
     input clk,
     input rst,
@@ -474,16 +469,15 @@ module ALU_IR (
     end
 endmodule
 
-// ================================================
+
 // TOP SYSTEM (ĐÃ SỬA HOÀN CHỈNH)
-// ================================================
 module TOP_SYSTEM (
     input wire clk,
     input wire rst,
     input wire rx,
     output wire tx
 );
-    // ================= UART RX =================
+    // UART RX 
     wire [7:0] rx_data;
     wire rx_ready;
     UART_RX uart_rx (
@@ -491,7 +485,7 @@ module TOP_SYSTEM (
         .rx_data(rx_data), .rx_ready(rx_ready)
     );
 
-    // ================= UART → RAM =================
+    // UART → RAM 
     wire uart_ram_we;
     wire [7:0] uart_ram_addr;
     wire [7:0] uart_ram_data;
@@ -505,7 +499,7 @@ module TOP_SYSTEM (
         .system_run(system_run)
     );
 
-    // ================= CPU =================
+    //  CPU 
     wire [7:0] pc_out;
     wire [7:0] rom_data;
     wire [3:0] opcode, operand;
@@ -514,13 +508,13 @@ module TOP_SYSTEM (
     wire tx_start, tx_mux_sel;
     wire tx_busy;
 
-    // ================= ROM =================
+    // = ROM =
     ROM rom (
         .addr(pc_out),
         .data_out(rom_data)
     );
 
-    // ================= PC =================
+    //  PC 
     wire stop_cmd = (opcode == 4'b0111);
     PC pc (
         .clk(clk), .rst(rst),
@@ -530,7 +524,7 @@ module TOP_SYSTEM (
         .pc_out(pc_out)
     );
 
-    // ================= IR =================
+    //  IR 
     ALU_IR ir (
         .clk(clk), .rst(rst),
         .load(ir_load),
@@ -539,7 +533,7 @@ module TOP_SYSTEM (
         .operand(operand)
     );
 
-    // ================= FSM =================
+    // FSM
     CPU_FSM fsm (
         .clk(clk), .rst(rst),
         .tx_busy(tx_busy),
@@ -556,7 +550,7 @@ module TOP_SYSTEM (
         .tx_mux_sel(tx_mux_sel)
     );
 
-    // ================= RAM =================
+    //  RAM 
     wire [7:0] ram_data_out;
     wire [7:0] ram_addr = system_run ? {4'b0000, operand} : uart_ram_addr;
     wire [7:0] ram_data = system_run ? alu_result : uart_ram_data;
@@ -570,13 +564,13 @@ module TOP_SYSTEM (
         .data_out(ram_data_out)
     );
 
-    // ================= REGISTERS =================
+    //  REGISTERS
     wire [7:0] regA, regB, regMode;
     REG8 regA_inst (.clk(clk), .rst(rst), .en(en_A),     .d(ram_data_out), .q(regA));
     REG8 regB_inst (.clk(clk), .rst(rst), .en(en_B),     .d(ram_data_out), .q(regB));
     REG8 regM_inst (.clk(clk), .rst(rst), .en(en_Mode),  .d(ram_data_out), .q(regMode));
 
-    // ================= ALU =================
+    // =ALU
     wire [7:0] alu_out;
     wire carry, zero;
     ALU_8BITD alu (                     // ← SỬA TÊN MODULE
@@ -587,7 +581,7 @@ module TOP_SYSTEM (
         .zero(zero)
     );
 
-    // ================= ALU RESULT =================
+    //  ALU RESULT 
     wire [7:0] alu_result;
     REG8 regALU (
         .clk(clk), .rst(rst),
@@ -596,7 +590,7 @@ module TOP_SYSTEM (
         .q(alu_result)
     );
 
-    // ================= UART TX =================
+    // = UART TX =
     wire [7:0] tx_data;
     assign tx_data = (tx_mux_sel) ? {6'b0, zero, carry} : alu_result;
 
