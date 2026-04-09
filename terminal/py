@@ -3,7 +3,7 @@ import time
 import sys
 
 # ====================== CẤU HÌNH ======================
-COM_PORT = "COM3"          # ← THAY BẰNG CỔNG COM CỦA BẠN
+COM_PORT = "COM16"          # ← THAY BẰNG CỔNG COM CỦA BẠN
 BAUDRATE = 115200          # Tốc độ baudrate của UART_RX/TX
 TIMEOUT  = 2               # Thời gian chờ (giây)
 
